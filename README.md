@@ -41,6 +41,17 @@ Tambem da para colar URLs de paginas direto no leitor para testar no navegador, 
 
 O site permanece estatico e leve para o plano gratis da Azure; os dados vem por API no navegador.
 
+## Status oficial dos providers
+
+O site tambem consulta o repositório oficial `consumet/providers-status` para mostrar quais providers estao online:
+
+```text
+https://raw.githubusercontent.com/consumet/providers-status/main/README.md
+https://raw.githubusercontent.com/consumet/providers-status/main/status.json
+```
+
+Esse status alimenta a barra "Providers oficiais" do site. Ela mostra anime, manga, meta e news com os providers online no momento.
+
 ## Dominio
 
 Dominio pretendido:

@@ -79,6 +79,15 @@ ul{list-style:none}
 .api-st.err{background:rgba(224,32,32,.15);color:var(--red2)}
 .api-st.idle{background:rgba(255,215,0,.1);color:var(--gold)}
 .api-st.loading{background:rgba(255,215,0,.1);color:var(--gold)}
+.provider-status{background:rgba(5,13,31,.98);border-bottom:1px solid rgba(255,215,0,.08);padding:10px 24px}
+.provider-status-i{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.provider-title{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:2px}
+.provider-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--muted);background:rgba(255,255,255,.04)}
+.provider-pill.ok{color:#4cdc7a;border-color:rgba(76,220,122,.25);background:rgba(76,220,122,.08)}
+.provider-pill.err{color:var(--red2);border-color:rgba(255,58,58,.25);background:rgba(224,32,32,.08)}
+.provider-pill.warn{color:var(--gold);border-color:rgba(255,215,0,.25);background:rgba(255,215,0,.08)}
+.provider-pill a{text-decoration:none;color:inherit}
+.provider-note{font-size:11px;color:var(--faint);margin-left:auto}
 
 /* ===== HERO ===== */
 .hero{position:relative;min-height:88vh;display:flex;align-items:center;overflow:hidden;background:linear-gradient(135deg,#020815 0%,#050d1f 40%,#0a1628 70%,#060e1e 100%)}
@@ -369,6 +378,13 @@ ul{list-style:none}
   </div>
 </div>
 
+<div class="provider-status">
+  <div class="provider-status-i" id="providerStatus">
+    <span class="provider-title">Providers oficiais:</span>
+    <span class="provider-pill warn">Carregando status Consumet...</span>
+  </div>
+</div>
+
 <!-- SECTIONS -->
 <div id="pg-home">
 <!-- HERO -->
@@ -568,6 +584,7 @@ ul{list-style:none}
       <div class="fc"><h4>Dev</h4><ul>
         <li><a href="https://jikan.moe/" target="_blank" rel="noopener">Jikan API</a></li>
         <li><a href="https://docs.api.jikan.moe/" target="_blank" rel="noopener">Documentação API</a></li>
+        <li><a href="https://github.com/consumet/providers-status" target="_blank" rel="noopener">Status Consumet</a></li>
         <li><a href="#" onclick="openAdmin();return false">Painel Admin</a></li>
       </ul></div>
     </div>
@@ -705,6 +722,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   initReveal();
   connectAPI();
   loadMangaAPI();
+  loadProviderStatus();
 });
 
 function loadAPIConfig(){
@@ -890,6 +908,8 @@ async function playEp(idx){
 // =============================================================
 const JIKAN_BASE='https://api.jikan.moe/v4';
 const ZATCH_MAL_ID=250;
+const CONSUMET_STATUS_README='https://raw.githubusercontent.com/consumet/providers-status/main/README.md';
+const CONSUMET_STATUS_JSON='https://raw.githubusercontent.com/consumet/providers-status/main/status.json';
 
 async function connectAPI(){
   S.apiUrl=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');
@@ -984,6 +1004,105 @@ async function fetchJSON(url,timeout=12000){
   const res=await fetch(url,{signal:AbortSignal.timeout(timeout)});
   if(!res.ok)throw new Error(`HTTP ${res.status} em ${url}`);
   return res.json();
+}
+
+async function loadProviderStatus(){
+  try{
+    const text=await fetchText(CONSUMET_STATUS_README,12000);
+    const parsed=parseProviderStatusMarkdown(text);
+    renderProviderStatus(parsed);
+  }catch(e){
+    try{
+      const json=await fetchJSON(CONSUMET_STATUS_JSON,12000);
+      renderProviderStatus(normalizeProviderStatusJSON(json));
+    }catch(e2){
+      const el=document.getElementById('providerStatus');
+      if(el)el.innerHTML='<span class="provider-title">Providers oficiais:</span><span class="provider-pill warn">Status indisponível agora</span>';
+    }
+  }
+}
+
+async function fetchText(url,timeout=12000){
+  const res=await fetch(url,{signal:AbortSignal.timeout(timeout)});
+  if(!res.ok)throw new Error(`HTTP ${res.status} em ${url}`);
+  return res.text();
+}
+
+function parseProviderStatusMarkdown(markdown){
+  const normalized=markdown.replace(/\r?\n/g,' ');
+  const lastUpdated=(normalized.match(/Last updated:\s*([^#|]+)/i)?.[1]||'').trim();
+  const categories={};
+  const sectionRe=/##\s+([A-Z_]+)\s+(.*?)(?=\s+##\s+[A-Z_]+|\s+---|\s+##\s+Summary|$)/g;
+  let section;
+  while((section=sectionRe.exec(normalized))){
+    const category=section[1];
+    const body=section[2];
+    categories[category]=[];
+    const rowRe=/\|\s*\[([^\]]+)\]\(([^)]+)\)\s*\|\s*(?:[^\d|]*\s*)?(\d+)\s*\|\s*([^|]+?)\s*\|/g;
+    let row;
+    while((row=rowRe.exec(body))){
+      categories[category].push({
+        provider:row[1],
+        baseUrl:row[2],
+        status:Number(row[3]),
+        responseTime:row[4].trim(),
+        category
+      });
+    }
+  }
+  return {lastUpdated,categories};
+}
+
+function normalizeProviderStatusJSON(json){
+  const categories={};
+  (json.categories||[]).forEach(cat=>{
+    categories[cat.category]=(cat.providers||[]).map(p=>({...p,category:cat.category}));
+  });
+  return {lastUpdated:json.lastUpdated||'',categories};
+}
+
+function renderProviderStatus(status){
+  const el=document.getElementById('providerStatus');
+  if(!el)return;
+  const cat=status.categories||{};
+  const animeOk=(cat.ANIME||[]).filter(p=>p.status===200);
+  const mangaOk=(cat.MANGA||[]).filter(p=>p.status===200);
+  const metaOk=(cat.META||[]).filter(p=>p.status===200);
+  const newsOk=(cat.NEWS||[]).filter(p=>p.status===200);
+  const pills=[
+    providerSummaryPill('Anime',animeOk,cat.ANIME||[]),
+    providerSummaryPill('Mangá',mangaOk,cat.MANGA||[]),
+    providerSummaryPill('Meta',metaOk,cat.META||[]),
+    providerSummaryPill('News',newsOk,cat.NEWS||[])
+  ];
+  const updated=status.lastUpdated?`Atualizado ${formatProviderDate(status.lastUpdated)}`:'Consumet providers-status';
+  el.innerHTML=[
+    '<span class="provider-title">Providers oficiais:</span>',
+    ...pills,
+    `<span class="provider-note">${updated}</span>`
+  ].join('');
+}
+
+function providerSummaryPill(label,working,total){
+  const cls=working.length?'ok':'err';
+  const names=working.slice(0,3).map(p=>`<a href="${safeUrl(p.baseUrl)}" target="_blank" rel="noopener">${escapeHTML(p.provider)}</a>`).join(', ');
+  const text=working.length?`${label}: ${names}${working.length>3?` +${working.length-3}`:''}`:`${label}: 0/${total.length} online`;
+  return `<span class="provider-pill ${cls}">${text}</span>`;
+}
+
+function escapeHTML(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function safeUrl(value){
+  const url=String(value??'');
+  return /^https?:\/\//i.test(url)?escapeHTML(url):'#';
+}
+
+function formatProviderDate(value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return value;
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
 
 function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
