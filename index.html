@@ -341,20 +341,18 @@ ul{list-style:none}
 <!-- API BAR -->
 <div class="api-bar">
   <div class="api-bar-i">
-    <label>🔌 API:</label>
-    <input type="text" id="apiUrl" placeholder="https://seu-app.azurewebsites.net" value="">
+    <label>🔌 Episódios:</label>
+    <input type="text" id="apiUrl" placeholder="Opcional: API propria autorizada para video" value="">
     <select id="apiProvider">
-      <option value="hianime" selected>HiAnime</option>
-      <option value="gogoanime">Gogoanime</option>
-      <option value="animepahe">AnimePahe</option>
-      <option value="meta/anilist">AniList + streams</option>
+      <option value="jikan" selected>Jikan / MyAnimeList</option>
+      <option value="custom">API propria</option>
     </select>
     <select id="apiDub">
       <option value="sub">Legendado</option>
       <option value="dub">Dublado</option>
     </select>
-    <button class="btn-api" onclick="connectAPI()">⚡ Conectar &amp; Carregar</button>
-    <span class="api-st idle" id="apiSt">⚡ Use sua API Azure</span>
+    <button class="btn-api" onclick="connectAPI()">⚡ Carregar episódios</button>
+    <span class="api-st idle" id="apiSt">⚡ Catálogo pronto</span>
   </div>
 </div>
 
@@ -555,8 +553,8 @@ ul{list-style:none}
         <li><a href="#">O Mangá</a></li><li><a href="#">Privacidade</a></li>
       </ul></div>
       <div class="fc"><h4>Dev</h4><ul>
-        <li><a href="https://github.com/consumet/api.consumet.org" target="_blank" rel="noopener">Consumet GitHub</a></li>
-        <li><a href="https://docs.consumet.org/" target="_blank" rel="noopener">Documentação API</a></li>
+        <li><a href="https://jikan.moe/" target="_blank" rel="noopener">Jikan API</a></li>
+        <li><a href="https://docs.api.jikan.moe/" target="_blank" rel="noopener">Documentação API</a></li>
         <li><a href="#" onclick="openAdmin();return false">Painel Admin</a></li>
       </ul></div>
     </div>
@@ -611,7 +609,7 @@ ul{list-style:none}
 // =============================================================
 const S = {
   apiUrl:'',
-  provider:'hianime',
+  provider:'jikan',
   dub:'sub',
   animeId:null,
   allEps:[],
@@ -629,40 +627,8 @@ const S = {
 let plyr=null, hls=null;
 
 // =============================================================
-// DEMO DATA
+// DATA
 // =============================================================
-const EP_TITLES=[
-  'O Encontro com Zatch Bell!','O Poder do Feitiço Zaker!','Amigo para Sempre',
-  'A Batalha Começa!','Naomi a Valentona','Tia e Kiyo',
-  'O Mamodo de Ponygon','Brago, o Poderoso','Kiyo Fica Doente',
-  'Zatch e Kiyo Lutam Juntos','O Feitiço Proibido','Mamodo na Escola',
-  'A Amizade Verdadeira','Poder do Raijin','A Última Batalha',
-  'Segredo do Mundo Mamodo','O Feitiço de Fogo','Duelo nas Alturas',
-  'O Retorno de Brago','Kiyo e a Prova Final'
-];
-
-const DEMO_EPS = Array.from({length:150},(_,i)=>{
-  const ep=i+1;
-  return {
-    id:`zatch-bell-dub-episode-${ep}`,
-    idSub:`zatch-bell-episode-${ep}`,
-    number:ep,
-    title:EP_TITLES[i%EP_TITLES.length]||`Episódio ${ep}`,
-    description:`Zatch e Kiyo enfrentam mais um mamodo neste episódio emocionante. A amizade entre eles é posta à prova enquanto descobrem novos feitiços poderosos da spellbook vermelha.`,
-    image:`https://picsum.photos/seed/zb${ep}/320/180`,
-    season:ep<=50?1:ep<=100?2:3,
-    subOrDub:'sub',
-    hasDub:ep<=150
-  };
-});
-
-const DEMO_MANGA=Array.from({length:33},(_,i)=>{
-  const v=i+1, cs=(i*7)+1;
-  return {id:`v${v}`,volume:v,title:`Volume ${v}`,
-    chapters:Array.from({length:7},(__,j)=>({num:cs+j,title:`Capítulo ${cs+j} — O Desafio`})),
-    cover:`https://picsum.photos/seed/mgz${v}/200/300`,chapterRange:`Cap. ${cs}–${cs+6}`};
-});
-
 const DEMO_NEWS=[
   {tag:'anime',title:'Zatch Bell! completo disponível',desc:'Todos os 150 episódios do clássico shōnen.',date:'10 mai 2024',img:'https://picsum.photos/seed/nw1/400/225'},
   {tag:'evento',title:'Retrospectiva no Anime Friends 2024',desc:'Sessão especial de episódios e surpresas.',date:'28 abr 2024',img:'https://picsum.photos/seed/nw2/400/225'},
@@ -686,7 +652,7 @@ function nav(p){
   window.scrollTo({top:0,behavior:'smooth'});
   document.getElementById('nav').classList.remove('open');
   if(p==='home'){renderHome();}
-  if(p==='manga'&&!S.mangaData.length){S.mangaData=[...DEMO_MANGA];renderMangaGrid();}
+  if(p==='manga'&&!S.mangaData.length){S.mangaData=[];renderMangaGrid();}
   if(p==='filmes')renderFilmes();
 }
 function goHome(){nav('home');}
@@ -698,12 +664,14 @@ function toggleMenu(){document.getElementById('nav').classList.toggle('open');}
 window.addEventListener('DOMContentLoaded',()=>{
   initPlayer();
   loadAPIConfig();
-  S.allEps=[...DEMO_EPS];
-  S.filteredEps=[...S.allEps];
-  S.mangaData=[...DEMO_MANGA];
+  S.allEps=[];
+  S.filteredEps=[];
+  S.mangaData=[];
   renderHome();
   renderEps(S.filteredEps);
   initReveal();
+  connectAPI();
+  loadMangaAPI();
 });
 
 function loadAPIConfig(){
@@ -715,7 +683,11 @@ function loadAPIConfig(){
   const apiProvider=document.getElementById('apiProvider');
   const apiDub=document.getElementById('apiDub');
   if(apiUrl)apiUrl.value=S.apiUrl;
-  if(apiProvider)apiProvider.value=S.provider;
+  if(apiProvider){
+    const allowed=[...apiProvider.options].map(o=>o.value);
+    if(!allowed.includes(S.provider))S.provider='jikan';
+    apiProvider.value=S.provider;
+  }
   if(apiDub)apiDub.value=S.dub;
   if(S.apiUrl)setSt('idle','⚡ API salva');
 }
@@ -827,10 +799,12 @@ function setFilter(t,btn){
 // =============================================================
 function initPlayer(){
   const v=document.getElementById('mainVid');
-  plyr=new Plyr(v,{
-    controls:['play','progress','current-time','mute','volume','captions','settings','pip','fullscreen'],
-    settings:['captions','quality','speed'],speed:{selected:1,options:[0.5,0.75,1,1.25,1.5,2]}
-  });
+  if(window.Plyr){
+    plyr=new Plyr(v,{
+      controls:['play','progress','current-time','mute','volume','captions','settings','pip','fullscreen'],
+      settings:['captions','quality','speed'],speed:{selected:1,options:[0.5,0.75,1,1.25,1.5,2]}
+    });
+  }
   v.addEventListener('ended',()=>{if(S.autoplay)nextEp();});
 }
 
@@ -864,7 +838,7 @@ async function playEp(idx){
   const si=document.getElementById('sb'+idx);
   if(si){si.classList.add('on');si.scrollIntoView({block:'nearest'});}
 
-  // Fetch stream from Consumet
+  // Fetch authorized stream only when a custom API is configured.
   const streamData=await fetchStream(ep);
   if(streamData&&streamData.sources&&streamData.sources.length>0){
     S.sources=streamData.sources;
@@ -873,64 +847,45 @@ async function playEp(idx){
     document.getElementById('pStreamInfo').textContent=
       `✓ ${streamData.sources.length} fonte(s) disponível (${streamData.sources[0].quality||'auto'})`;
   } else {
-    document.getElementById('pStreamInfo').textContent='⚠ Stream não disponível. Configure a API Consumet corretamente.';
+    document.getElementById('pStreamInfo').textContent='⚠ Episódio carregado pelo catálogo. Para vídeo, configure uma API própria autorizada.';
     loadSource(-1);
   }
 }
 
 // =============================================================
-// CONSUMET API — FULL FLOW
+// EPISODE API — JIKAN CATALOG + OPTIONAL AUTHORIZED VIDEO API
 // =============================================================
+const JIKAN_BASE='https://api.jikan.moe/v4';
+const ZATCH_MAL_ID=250;
+
 async function connectAPI(){
   S.apiUrl=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');
   S.provider=document.getElementById('apiProvider').value;
   S.dub=document.getElementById('apiDub').value;
 
-  if(!S.apiUrl){
-    setSt('err','Informe a URL');
-    toast('Cole a URL da sua API no Azure ou VPS primeiro.','err');
-    return;
-  }
   localStorage.setItem('zatchApiConfig',JSON.stringify({
     apiUrl:S.apiUrl,provider:S.provider,dub:S.dub
   }));
 
-  setSt('loading','🔄 Conectando...');
-  toast('🔄 Buscando Zatch Bell na API...','inf');
+  setSt('loading','🔄 Carregando...');
+  toast('🔄 Puxando episódios pela API...','inf');
 
   try{
-    // 1. Search for the anime
-    await testAPIBase();
-
-    const searchQ=encodeURIComponent('zatch bell');
-    const searchRes=await fetchAPI(apiPath('search',searchQ));
-    const results=normalizeResults(searchRes);
-    if(!results.length)throw new Error('Anime não encontrado. Tente outro provider.');
-
-    // Pick best match
-    const anime=results.find(r=>{
-      const t=(r.title||r.name||'').toLowerCase();
-      return t.includes('zatch')||t.includes('gash');
-    })||results[0];
-    S.animeId=anime.id;
-
-    toast(`✓ Anime encontrado: "${anime.title||anime.name}"`, 'ok');
-
-    // 2. Get episodes list
-    const infoRes=await fetchAPI(apiPath('info',encodeURIComponent(S.animeId)));
-    const episodes=normalizeEpisodes(infoRes);
+    const episodes=S.provider==='custom'&&S.apiUrl
+      ? await loadCustomEpisodes()
+      : await loadJikanEpisodes();
 
     if(episodes.length>0){
       S.allEps=episodes.map((ep,i)=>({
-        id:ep.id||`ep${i+1}`,
-        idSub:ep.id,
-        number:ep.number||i+1,
-        title:ep.title||ep.name||`Episódio ${ep.number||i+1}`,
-        description:ep.description||ep.overview||'',
-        image:ep.image||ep.img||`https://picsum.photos/seed/zb${ep.number||i+1}/320/180`,
-        season:(ep.number||i+1)<=50?1:(ep.number||i+1)<=100?2:3,
+        id:ep.id||ep.mal_id||`ep${i+1}`,
+        idSub:ep.id||ep.mal_id||`ep${i+1}`,
+        number:Number(ep.number||ep.mal_id||i+1),
+        title:ep.title||ep.name||`Episódio ${ep.number||ep.mal_id||i+1}`,
+        description:episodeDescription(ep),
+        image:ep.image||ep.img||ep.thumbnail||`https://picsum.photos/seed/zb${ep.number||ep.mal_id||i+1}/320/180`,
+        season:episodeSeason(ep.number||ep.mal_id||i+1),
         subOrDub:ep.subOrDub||ep.type||'sub',
-        hasDub:ep.subOrDub==='dub'||ep.subOrDub==='both'||(infoRes.subOrDub==='dub')
+        hasDub:Boolean(ep.hasDub||ep.subOrDub==='dub'||ep.subOrDub==='both')
       }));
       S.filteredEps=[...S.allEps];
       setSt('ok',`✓ ${S.allEps.length} eps`);
@@ -943,27 +898,41 @@ async function connectAPI(){
   }catch(e){
     setSt('err','✗ Falhou');
     toast(`✗ ${e.message}`,'err');
-    // Fallback to demo
-    S.allEps=[...DEMO_EPS];
-    S.filteredEps=[...S.allEps];
+    S.allEps=[];
+    S.filteredEps=[];
     renderEps(S.filteredEps);
   }
 }
 
 async function fetchStream(ep){
-  if(!S.animeId){
-    // No API connected, return null
+  if(S.provider!=='custom'||!S.apiUrl){
     return null;
   }
   try{
-    const epId=S.dub==='dub'?(ep.id?.includes('dub')?ep.id:ep.id+'-dub'):ep.idSub||ep.id;
-    return normalizeStream(await fetchAPI(apiPath('watch',encodeURIComponent(epId))));
+    return normalizeStream(await fetchAPI(`/episodes/${encodeURIComponent(ep.id)}/sources?type=${encodeURIComponent(S.dub)}`));
   }catch(e){
-    // Try without dub modifier
     try{
-      return normalizeStream(await fetchAPI(apiPath('watch',encodeURIComponent(ep.id))));
+      return normalizeStream(await fetchAPI(`/watch/${encodeURIComponent(ep.id)}`));
     }catch(e2){return null;}
   }
+}
+
+async function loadJikanEpisodes(){
+  const first=await fetchJSON(`${JIKAN_BASE}/anime/${ZATCH_MAL_ID}/episodes?page=1`);
+  const pages=first.pagination?.last_visible_page||1;
+  const batches=[...(first.data||[])];
+  for(let page=2;page<=pages;page++){
+    await wait(450);
+    const data=await fetchJSON(`${JIKAN_BASE}/anime/${ZATCH_MAL_ID}/episodes?page=${page}`);
+    batches.push(...(data.data||[]));
+  }
+  return batches.sort((a,b)=>(a.mal_id||0)-(b.mal_id||0));
+}
+
+async function loadCustomEpisodes(){
+  await testAPIBase();
+  const data=await fetchAPI('/episodes');
+  return data?.episodes||data?.results||data?.data||[];
 }
 
 async function fetchAPI(path,timeout=10000){
@@ -976,6 +945,28 @@ async function fetchAPI(path,timeout=10000){
     if(e instanceof TypeError)throw new Error('Não consegui acessar a API. Confira se ela está online e com CORS liberado.');
     throw e;
   }
+}
+
+async function fetchJSON(url,timeout=12000){
+  const res=await fetch(url,{signal:AbortSignal.timeout(timeout)});
+  if(!res.ok)throw new Error(`HTTP ${res.status} em ${url}`);
+  return res.json();
+}
+
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+
+function episodeSeason(n){
+  n=Number(n)||1;
+  return n<=50?1:n<=100?2:3;
+}
+
+function episodeDescription(ep){
+  const bits=[];
+  if(ep.title_japanese)bits.push(ep.title_japanese);
+  if(ep.title_romanji)bits.push(ep.title_romanji);
+  if(ep.aired)bits.push(`Exibido em ${new Date(ep.aired).toLocaleDateString('pt-BR',{timeZone:'UTC'})}`);
+  if(ep.score)bits.push(`Nota MAL ${ep.score}`);
+  return ep.description||ep.overview||bits.join(' · ')||'Dados carregados pela API Jikan/MyAnimeList.';
 }
 
 async function testAPIBase(){
@@ -1105,12 +1096,30 @@ async function loadMangaAPI(){
   if(ld)ld.style.display='block';
   if(g)g.style.display='none';
   try{
-    const data=await fetchAPI('/manga/mangadex/'+encodeURIComponent('zatch bell'));
-    const r=data.results||data.data||[];
-    if(r.length){toast(`✓ Mangá carregado via MangaDex!`,'ok');}
-    else throw new Error('Sem resultados');
+    const data=await fetchJSON(`${JIKAN_BASE}/manga?q=${encodeURIComponent('zatch bell')}&sfw`);
+    const manga=(data.data||[]).find(m=>{
+      const title=`${m.title||''} ${m.title_english||''}`.toLowerCase();
+      return title.includes('zatch')||title.includes('gash');
+    })||(data.data||[])[0];
+    if(!manga)throw new Error('Sem resultados');
+    const vols=Number(manga.volumes)||33;
+    const chapters=Number(manga.chapters)||323;
+    S.mangaData=Array.from({length:vols},(_,i)=>{
+      const v=i+1;
+      const start=Math.floor(i*chapters/vols)+1;
+      const end=Math.floor((i+1)*chapters/vols);
+      return {
+        id:`api-v${v}`,
+        volume:v,
+        title:`${manga.title||'Zatch Bell!'} Vol. ${v}`,
+        chapters:Array.from({length:Math.max(1,end-start+1)},(__,j)=>({num:start+j,title:`Capítulo ${start+j}`})),
+        cover:manga.images?.jpg?.image_url||manga.images?.webp?.image_url||`https://picsum.photos/seed/mgz${v}/200/300`,
+        chapterRange:`Cap. ${start}-${end}`
+      };
+    });
+    toast(`✓ Mangá carregado via Jikan!`,'ok');
   }catch(e){
-    toast('Usando dados demo de mangá.','inf');
+    toast('Não consegui carregar o mangá pela API agora.','err');
   }
   if(ld)ld.style.display='none';
   if(g)g.style.display='grid';
@@ -1188,3 +1197,4 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMg();closeAdmi
 </script>
 </body>
 </html>
+

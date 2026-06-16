@@ -4,14 +4,18 @@ Site estatico do Zatch Bell Brasil pronto para publicar como `index.html`.
 
 ## API
 
-O site espera uma instancia propria da Consumet API, por exemplo uma URL do Azure App Service:
+Os episodios sao carregados em tempo real pela Jikan API/MyAnimeList, sem salvar a lista de episodios no projeto.
+O anime usado e o MAL ID `250`, que retorna os 150 episodios.
+
+Para video, o campo de API propria e opcional e deve apontar para uma fonte autorizada com endpoints como:
 
 ```text
-https://seu-app.azurewebsites.net
+GET /episodes
+GET /episodes/{id}/sources?type=sub
+GET /watch/{id}
 ```
 
-No site, cole a URL no campo da API, escolha o provider e clique em `Conectar & Carregar`.
-A URL fica salva no navegador por `localStorage`.
+O site permanece estatico e leve para o plano gratis da Azure; os dados vem por API no navegador.
 
 ## Dominio
 
@@ -22,3 +26,15 @@ zatchbellbrasil.site
 ```
 
 Para usar no Azure, adicione esse dominio como custom domain no recurso do site/app e depois ajuste os registros DNS no Hostinger conforme os valores que o Azure mostrar.
+
+Para GitHub Pages, use estes registros DNS no Hostinger:
+
+```text
+A     @     185.199.108.153
+A     @     185.199.109.153
+A     @     185.199.110.153
+A     @     185.199.111.153
+CNAME www   lucasotirrar-lgtm.github.io
+```
+
+O arquivo `CNAME` ja aponta para `zatchbellbrasil.site`.
