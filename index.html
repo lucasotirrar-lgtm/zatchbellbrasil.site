@@ -899,6 +899,7 @@ async function playEp(idx){
 // =============================================================
 const JIKAN_BASE='https://api.jikan.moe/v4';
 const ZATCH_MAL_ID=250;
+const LOCAL_EPISODES_URL='data/episodes.json';
 const MANGADEX_BASE='https://api.mangadex.org';
 const MANGADEX_COVER_BASE='https://uploads.mangadex.org/covers';
 const ZATCH_MANGADEX_ID='63e54dfd-f7a9-473e-a591-28558e229c5b';
@@ -921,7 +922,7 @@ async function connectAPI(){
   try{
     const episodes=S.provider==='custom'&&S.apiUrl
       ? await loadCustomEpisodes()
-      : await loadJikanEpisodes();
+      : await loadEpisodeCatalog();
 
     if(episodes.length>0){
       S.allEps=episodes.map((ep,i)=>({
@@ -930,7 +931,7 @@ async function connectAPI(){
         number:Number(ep.number||ep.mal_id||i+1),
         title:ep.title||ep.name||`Episódio ${ep.number||ep.mal_id||i+1}`,
         description:episodeDescription(ep),
-        image:ep.image||ep.img||ep.thumbnail||`https://picsum.photos/seed/zb${ep.number||ep.mal_id||i+1}/320/180`,
+        image:ep.image||ep.img||ep.thumbnail||DEFAULT_SITE_IMAGE,
         season:episodeSeason(ep.number||ep.mal_id||i+1),
         subOrDub:ep.subOrDub||ep.type||'sub',
         hasDub:Boolean(ep.hasDub||ep.subOrDub==='dub'||ep.subOrDub==='both'||hasDubAPI())
@@ -986,6 +987,17 @@ async function loadJikanEpisodes(){
     batches.push(...(data.data||[]));
   }
   return batches.sort((a,b)=>(a.mal_id||0)-(b.mal_id||0));
+}
+
+async function loadEpisodeCatalog(){
+  try{
+    return await loadJikanEpisodes();
+  }catch(e){
+    const local=await fetchJSON(LOCAL_EPISODES_URL,6000);
+    const episodes=local?.episodes||[];
+    if(!episodes.length)throw e;
+    return episodes;
+  }
 }
 
 async function loadCustomEpisodes(){
