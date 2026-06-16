@@ -903,6 +903,8 @@ const LOCAL_EPISODES_URL='data/episodes.json';
 const MANGADEX_BASE='https://api.mangadex.org';
 const MANGADEX_COVER_BASE='https://uploads.mangadex.org/covers';
 const ZATCH_MANGADEX_ID='63e54dfd-f7a9-473e-a591-28558e229c5b';
+const LOCAL_MANGA_URL='data/manga.json';
+const LOCAL_VIDEO_SOURCES_URL='data/video-sources.json';
 
 async function connectAPI(){
   const apiUrlEl=document.getElementById('apiUrl');
@@ -956,6 +958,8 @@ async function connectAPI(){
 async function fetchStream(ep){
   const cfg=S.videoApi||{};
   const base=(cfg.baseUrl||S.apiUrl||'').trim().replace(/\/$/,'');
+  const local=await fetchLocalVideoStream(ep);
+  if(local?.sources?.length)return local;
   if(!base||cfg.type==='none'){
     return null;
   }
@@ -975,6 +979,17 @@ async function fetchStream(ep){
       return normalizeStream(await fetchAPI(`/watch/${encodeURIComponent(ep.id)}`));
     }catch(e2){return null;}
   }
+}
+
+async function fetchLocalVideoStream(ep){
+  if(!S.localVideoSources){
+    try{S.localVideoSources=await fetchJSON(LOCAL_VIDEO_SOURCES_URL,5000);}
+    catch(e){S.localVideoSources={episodes:{}};}
+  }
+  const entries=S.localVideoSources?.episodes||{};
+  const item=entries[String(ep.number)]||entries[ep.id]||entries[`ep${ep.number}`];
+  if(!item)return null;
+  return normalizeStream(item);
 }
 
 async function loadJikanEpisodes(){
@@ -1264,14 +1279,25 @@ async function loadMangaAPI(){
   if(ld)ld.style.display='block';
   if(g)g.style.display='none';
   try{
-    S.mangaData=await loadMangaDexCatalog();
-    toast(`\u2713 Mang\u00e1 carregado via MangaDex!`,'ok');
+    S.mangaData=await loadMangaCatalog();
+    toast(`\u2713 Mang\u00e1 carregado!`,'ok');
   }catch(e){
-    toast(`N\u00e3o consegui carregar p\u00e1ginas via MangaDex: ${e.message}`,'err');
+    toast(`N\u00e3o consegui carregar mang\u00e1: ${e.message}`,'err');
   }
   if(ld)ld.style.display='none';
   if(g)g.style.display='grid';
   renderMangaGrid();
+}
+
+async function loadMangaCatalog(){
+  try{
+    return await loadMangaDexCatalog();
+  }catch(e){
+    const local=await fetchJSON(LOCAL_MANGA_URL,6000);
+    const volumes=local?.volumes||[];
+    if(!volumes.length)throw e;
+    return volumes;
+  }
 }
 
 async function loadMangaDexCatalog(){
@@ -1391,6 +1417,9 @@ async function openReader(volumeIdx,chapterIdx){
 }
 
 async function loadReaderPages(chapter){
+  if(chapter.imagePages?.length){
+    return normalizePageList(chapter.imagePages);
+  }
   const saved=localStorage.getItem(readerStorageKey(chapter.num));
   if(saved){
     try{return normalizePageList(JSON.parse(saved));}catch(e){}
