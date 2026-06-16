@@ -17,7 +17,16 @@ GET /watch/{id}
 
 ## Leitor de manga
 
-O leitor de manga tambem fica leve: o catalogo vem da Jikan API e as paginas podem vir de uma API propria/autorizada.
+O leitor de manga tambem fica leve. O catalogo e os capitulos do manga vem pela MangaDex API, usando o titulo `Zatch Bell!!` no MangaDex:
+
+```text
+https://api.mangadex.org/manga/63e54dfd-f7a9-473e-a591-28558e229c5b/feed
+https://api.mangadex.org/at-home/server/{chapterId}
+```
+
+As paginas sao montadas no navegador com a resposta MangaDex@Home, sem salvar imagens no projeto.
+
+Como fallback, o leitor tambem aceita paginas vindas de uma API propria/autorizada.
 
 Endpoints aceitos pelo leitor:
 

@@ -908,6 +908,9 @@ async function playEp(idx){
 // =============================================================
 const JIKAN_BASE='https://api.jikan.moe/v4';
 const ZATCH_MAL_ID=250;
+const MANGADEX_BASE='https://api.mangadex.org';
+const MANGADEX_COVER_BASE='https://uploads.mangadex.org/covers';
+const ZATCH_MANGADEX_ID='63e54dfd-f7a9-473e-a591-28558e229c5b';
 const CONSUMET_STATUS_README='https://raw.githubusercontent.com/consumet/providers-status/main/README.md';
 const CONSUMET_STATUS_JSON='https://raw.githubusercontent.com/consumet/providers-status/main/status.json';
 
@@ -1230,8 +1233,8 @@ function setDub(t){
 // =============================================================
 // MANGA
 // =============================================================
-function mgCard(m){
-  return `<div class="mg-card" onclick="openMg(${m.volume-1})">
+function mgCard(m,index){
+  return `<div class="mg-card" onclick="openMg(${index})">
     <div class="mg-cov"><img src="${m.cover}" alt="${m.title}" width="200" height="300" loading="lazy"></div>
     <div class="mg-body"><div class="mg-vol">Volume ${m.volume}</div><div class="mg-ttl">${m.title}</div><div class="mg-ch">${m.chapterRange}</div></div>
   </div>`;
@@ -1239,8 +1242,8 @@ function mgCard(m){
 function renderMangaGrid(){
   const g=document.getElementById('mgGridFull');
   const h=document.getElementById('homeMgGrid');
-  if(g)g.innerHTML=S.mangaData.map(m=>mgCard(m)).join('');
-  if(h)h.innerHTML=S.mangaData.slice(0,6).map(m=>mgCard(m)).join('');
+  if(g)g.innerHTML=S.mangaData.map((m,i)=>mgCard(m,i)).join('');
+  if(h)h.innerHTML=S.mangaData.slice(0,6).map((m,i)=>mgCard(m,i)).join('');
 }
 async function loadMangaAPI(){
   const ld=document.getElementById('mgLoad');
@@ -1248,34 +1251,105 @@ async function loadMangaAPI(){
   if(ld)ld.style.display='block';
   if(g)g.style.display='none';
   try{
-    const data=await fetchJSON(`${JIKAN_BASE}/manga?q=${encodeURIComponent('zatch bell')}&sfw`);
-    const manga=(data.data||[]).find(m=>{
-      const title=`${m.title||''} ${m.title_english||''}`.toLowerCase();
-      return title.includes('zatch')||title.includes('gash');
-    })||(data.data||[])[0];
-    if(!manga)throw new Error('Sem resultados');
-    const vols=Number(manga.volumes)||33;
-    const chapters=Number(manga.chapters)||323;
-    S.mangaData=Array.from({length:vols},(_,i)=>{
-      const v=i+1;
-      const start=Math.floor(i*chapters/vols)+1;
-      const end=Math.floor((i+1)*chapters/vols);
-      return {
-        id:`api-v${v}`,
-        volume:v,
-        title:`${manga.title||'Zatch Bell!'} Vol. ${v}`,
-        chapters:Array.from({length:Math.max(1,end-start+1)},(__,j)=>({num:start+j,title:`Capítulo ${start+j}`})),
-        cover:manga.images?.jpg?.image_url||manga.images?.webp?.image_url||`https://picsum.photos/seed/mgz${v}/200/300`,
-        chapterRange:`Cap. ${start}-${end}`
-      };
-    });
-    toast(`✓ Mangá carregado via Jikan!`,'ok');
+    S.mangaData=await loadMangaDexCatalog();
+    toast(`\u2713 Mang\u00e1 carregado via MangaDex!`,'ok');
   }catch(e){
-    toast('Não consegui carregar o mangá pela API agora.','err');
+    toast(`N\u00e3o consegui carregar p\u00e1ginas via MangaDex: ${e.message}`,'err');
   }
   if(ld)ld.style.display='none';
   if(g)g.style.display='grid';
   renderMangaGrid();
+}
+
+async function loadMangaDexCatalog(){
+  const manga=await fetchJSON(`${MANGADEX_BASE}/manga/${ZATCH_MANGADEX_ID}?includes[]=cover_art`);
+  const coverRel=(manga.data?.relationships||[]).find(r=>r.type==='cover_art');
+  const coverFile=coverRel?.attributes?.fileName;
+  const cover=coverFile
+    ? `${MANGADEX_COVER_BASE}/${ZATCH_MANGADEX_ID}/${coverFile}.256.jpg`
+    : 'https://picsum.photos/seed/mgz/200/300';
+  let chapters=await fetchMangaDexFeed(['pt-br']);
+  if(!chapters.length)chapters=await fetchMangaDexFeed(['en']);
+  if(!chapters.length)throw new Error('sem capitulos disponiveis');
+  const byVolume=new Map();
+  chapters.forEach(ch=>{
+    const a=ch.attributes||{};
+    const volume=String(a.volume||volumeFromChapter(a.chapter));
+    if(!byVolume.has(volume))byVolume.set(volume,[]);
+    byVolume.get(volume).push({
+      id:ch.id,
+      mdId:ch.id,
+      num:a.chapter||String(byVolume.get(volume).length+1),
+      title:a.title?`Cap\u00edtulo ${a.chapter} \u2014 ${a.title}`:`Cap\u00edtulo ${a.chapter}`,
+      pages:Number(a.pages)||0,
+      lang:a.translatedLanguage||'',
+      externalUrl:a.externalUrl||null
+    });
+  });
+  return [...byVolume.entries()]
+    .sort((a,b)=>numericSort(a[0],b[0]))
+    .map(([volume,chapters])=>{
+      chapters.sort((a,b)=>numericSort(a.num,b.num));
+      return {
+        id:`md-v${volume}`,
+        volume:Number(volume)||volume,
+        title:`Zatch Bell!! Vol. ${volume}`,
+        chapters,
+        cover,
+        chapterRange:`Cap. ${chapters[0]?.num||'?'}-${chapters.at(-1)?.num||'?'}`
+      };
+    });
+}
+
+async function fetchMangaDexFeed(languages){
+  const params=new URLSearchParams();
+  params.set('limit','500');
+  params.set('offset','0');
+  params.set('order[chapter]','asc');
+  languages.forEach(lang=>params.append('translatedLanguage[]',lang));
+  const first=await fetchJSON(`${MANGADEX_BASE}/manga/${ZATCH_MANGADEX_ID}/feed?${params.toString()}`);
+  const out=[...(first.data||[])];
+  const total=Number(first.total)||out.length;
+  for(let offset=500;offset<total;offset+=500){
+    await wait(350);
+    params.set('offset',String(offset));
+    const page=await fetchJSON(`${MANGADEX_BASE}/manga/${ZATCH_MANGADEX_ID}/feed?${params.toString()}`);
+    out.push(...(page.data||[]));
+  }
+  return dedupeMangaDexChapters(out);
+}
+
+function dedupeMangaDexChapters(chapters){
+  const seen=new Map();
+  chapters.forEach(ch=>{
+    const a=ch.attributes||{};
+    if(a.isUnavailable||a.externalUrl)return;
+    const key=`${a.volume||volumeFromChapter(a.chapter)}:${a.chapter}`;
+    const current=seen.get(key);
+    if(!current||chapterRank(ch)>chapterRank(current))seen.set(key,ch);
+  });
+  return [...seen.values()].sort((a,b)=>{
+    const av=a.attributes||{}, bv=b.attributes||{};
+    const volumeCmp=numericSort(av.volume||volumeFromChapter(av.chapter),bv.volume||volumeFromChapter(bv.chapter));
+    return volumeCmp||numericSort(av.chapter,bv.chapter);
+  });
+}
+
+function chapterRank(ch){
+  const a=ch.attributes||{};
+  const lang=a.translatedLanguage==='pt-br'?3:a.translatedLanguage==='en'?2:1;
+  return lang*10000+(Number(a.pages)||0);
+}
+
+function volumeFromChapter(chapter){
+  const n=Number.parseFloat(chapter)||1;
+  return Math.max(1,Math.ceil(n/10));
+}
+
+function numericSort(a,b){
+  const na=Number.parseFloat(a), nb=Number.parseFloat(b);
+  if(Number.isFinite(na)&&Number.isFinite(nb))return na-nb;
+  return String(a).localeCompare(String(b),'pt-BR',{numeric:true});
 }
 
 function openMg(i){
@@ -1321,7 +1395,25 @@ async function loadReaderPages(chapter){
       }catch(e){}
     }
   }
+  if(chapter.mdId){
+    try{return await loadMangaDexPages(chapter.mdId);}
+    catch(e){toast(`MangaDex não retornou páginas: ${e.message}`,'err');}
+  }
   return [];
+}
+
+async function loadMangaDexPages(chapterId){
+  const data=await fetchJSON(`${MANGADEX_BASE}/at-home/server/${chapterId}`,15000);
+  const base=data.baseUrl;
+  const chapter=data.chapter||{};
+  const hash=chapter.hash;
+  const files=chapter.dataSaver?.length?chapter.dataSaver:chapter.data;
+  const mode=chapter.dataSaver?.length?'data-saver':'data';
+  if(!base||!hash||!files?.length)throw new Error('capítulo sem imagens');
+  return files.map((file,i)=>({
+    url:`${base}/${mode}/${hash}/${file}`,
+    alt:`Página ${i+1}`
+  }));
 }
 
 function normalizePageList(data){
