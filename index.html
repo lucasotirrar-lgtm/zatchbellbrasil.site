@@ -92,7 +92,7 @@ ul{list-style:none}
 /* ===== HERO ===== */
 .hero{position:relative;min-height:88vh;display:flex;align-items:center;overflow:hidden;background:linear-gradient(135deg,#020815 0%,#050d1f 40%,#0a1628 70%,#060e1e 100%)}
 .hero-bg{position:absolute;inset:0;pointer-events:none}
-.hero-bg img{position:absolute;right:0;top:0;height:100%;width:60%;object-fit:cover;object-position:left;mask-image:linear-gradient(to left,rgba(0,0,0,.85) 0%,rgba(0,0,0,.35) 55%,transparent 100%)}
+.hero-bg img{position:absolute;right:0;top:50%;height:88%;width:68%;object-fit:contain;object-position:center right;transform:translateY(-50%);mask-image:linear-gradient(to left,rgba(0,0,0,.9) 0%,rgba(0,0,0,.45) 62%,transparent 100%)}
 .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 65% 50%,rgba(255,215,0,.05) 0%,transparent 60%),radial-gradient(ellipse at 25% 30%,rgba(26,111,255,.07) 0%,transparent 50%)}
 .hero-c{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:80px 24px;width:100%}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:99px;padding:6px 14px;font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:18px}
@@ -220,8 +220,7 @@ ul{list-style:none}
 /* ===== ABOUT ===== */
 .about-sec{background:linear-gradient(135deg,var(--navy2),var(--navy3));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .about-i{max-width:1280px;margin:0 auto;padding:64px 24px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
-.about-img{border-radius:var(--rxl);overflow:hidden;border:2px solid var(--border);box-shadow:var(--sc),var(--sg);animation:float 4s ease-in-out infinite}
-.about-img img{width:100%;object-fit:cover}
+.about-img{width:100%;aspect-ratio:16/9;object-fit:contain;background:linear-gradient(135deg,#050d1f,#0f1e36);border-radius:var(--rxl);overflow:hidden;border:2px solid var(--border);box-shadow:var(--sc),var(--sg);animation:float 4s ease-in-out infinite}
 .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
 .about-ttl{font-family:var(--fd);font-size:clamp(1.8rem,4vw,3.2rem);letter-spacing:2px;color:#fff;line-height:1;margin-bottom:14px}
 .about-ttl span{color:var(--gold)}
@@ -268,9 +267,9 @@ ul{list-style:none}
 .adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 .adm-f{display:flex;flex-direction:column;gap:5px}
 .adm-f label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.adm-f input{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:var(--rsm);padding:8px 11px;font-size:13px;color:var(--text);font-family:var(--fb);transition:border-color var(--tr)}
-.adm-f input:focus{outline:none;border-color:var(--gold)}
-.adm-prev{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--rmd);margin-top:5px;background:var(--navy3);display:none}
+.adm-f input,.adm-f select{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:var(--rsm);padding:8px 11px;font-size:13px;color:var(--text);font-family:var(--fb);transition:border-color var(--tr)}
+.adm-f input:focus,.adm-f select:focus{outline:none;border-color:var(--gold)}
+.adm-prev{width:100%;aspect-ratio:16/9;object-fit:contain;border-radius:var(--rmd);margin-top:5px;background:var(--navy3);display:none}
 .adm-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
 .btn-adm-s{background:var(--gold);color:#050d1f;font-weight:800;font-size:14px;padding:9px 20px;border-radius:var(--rmd);transition:all var(--tr)}
 .btn-adm-s:hover{background:var(--gold2)}
@@ -294,9 +293,9 @@ ul{list-style:none}
 /* ===== FOOTER ===== */
 .footer{background:var(--navy);border-top:1px solid var(--border);padding:44px 24px 22px}
 .footer-i{max-width:1280px;margin:0 auto}
-.ft{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:36px;margin-bottom:36px}
+.ft{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:0}
 .fb-brand .logo-t{font-size:1.8rem;display:block;margin-bottom:10px}
-.fb-brand p{font-size:13px;color:var(--muted);line-height:1.6;max-width:28ch}
+.fb-brand p{font-size:13px;color:var(--muted);line-height:1.6;max-width:42ch}
 .soc{display:flex;gap:8px;margin-top:14px}
 .soc a{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all var(--tr)}
 .soc a:hover{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3);color:var(--gold)}
@@ -304,7 +303,7 @@ ul{list-style:none}
 .fc ul{display:flex;flex-direction:column;gap:7px}
 .fc a{font-size:13px;color:var(--muted);transition:color var(--tr)}
 .fc a:hover{color:var(--text)}
-.fb{border-top:1px solid var(--border);padding-top:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.fb{border-top:1px solid var(--border);padding-top:18px;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}
 .fb-copy{font-size:11px;color:var(--faint)}
 .fb-adm{font-size:12px;font-weight:700;color:var(--faint);transition:color var(--tr);display:flex;align-items:center;gap:4px}
 .fb-adm:hover{color:var(--gold)}
@@ -322,7 +321,7 @@ ul{list-style:none}
   .nav a{font-size:17px;padding:12px 14px}
   .hbg{display:flex}
   .hero{min-height:70vh}
-  .hero-bg img{width:100%;mask-image:linear-gradient(to top,transparent 0%,rgba(0,0,0,.25) 40%,rgba(0,0,0,.6) 100%)}
+  .hero-bg img{top:0;right:0;width:100%;height:58%;transform:none;object-position:center top;mask-image:linear-gradient(to top,transparent 0%,rgba(0,0,0,.25) 36%,rgba(0,0,0,.72) 100%)}
   .ep-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
   .mg-grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}
   .ft{grid-template-columns:1fr 1fr}
@@ -360,37 +359,12 @@ ul{list-style:none}
   </div>
 </header>
 
-<!-- API BAR -->
-<div class="api-bar">
-  <div class="api-bar-i">
-    <label>🔌 Episódios:</label>
-    <input type="text" id="apiUrl" placeholder="Opcional: API propria autorizada para video" value="">
-    <select id="apiProvider">
-      <option value="jikan" selected>Jikan / MyAnimeList</option>
-      <option value="custom">API propria</option>
-    </select>
-    <select id="apiDub">
-      <option value="sub">Legendado</option>
-      <option value="dub">Dublado</option>
-    </select>
-    <button class="btn-api" onclick="connectAPI()">⚡ Carregar episódios</button>
-    <span class="api-st idle" id="apiSt">⚡ Catálogo pronto</span>
-  </div>
-</div>
-
-<div class="provider-status">
-  <div class="provider-status-i" id="providerStatus">
-    <span class="provider-title">Providers oficiais:</span>
-    <span class="provider-pill warn">Carregando status Consumet...</span>
-  </div>
-</div>
-
 <!-- SECTIONS -->
 <div id="pg-home">
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg">
-    <img id="heroBgImg" src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/eb9b9307-8859-4360-bc31-81ad70b9247b.png" alt="Zatch Bell" width="900" height="600" loading="eager">
+    <img id="heroBgImg" src="https://i.imgur.com/XkVbSLk.png" alt="Zatch Bell" width="2048" height="1152" loading="eager">
     <div class="hero-glow"></div>
   </div>
   <div class="hero-c">
@@ -452,7 +426,7 @@ ul{list-style:none}
 <!-- ABOUT -->
 <section class="about-sec reveal">
   <div class="about-i">
-    <img class="about-img" id="aboutImg" src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/eb9b9307-8859-4360-bc31-81ad70b9247b.png" alt="Zatch Bell" width="600" height="400" loading="lazy">
+    <img class="about-img" id="aboutImg" src="https://i.imgur.com/XkVbSLk.png" alt="Zatch Bell" width="2048" height="1152" loading="lazy">
     <div>
       <div class="about-badge">⚡ Sobre o Anime</div>
       <h2 class="about-ttl">KONJIKI NO<br><span>GASH BELL!!</span></h2>
@@ -558,38 +532,8 @@ ul{list-style:none}
     <div class="ft">
       <div class="fb-brand">
         <span class="logo-t">⚡ ZATCH BELL!</span>
-        <p>Acompanhe episódios, mangá e muito mais sobre o universo Mamodo.</p>
-        <div class="soc">
-          <a href="#" target="_blank" rel="noopener" aria-label="Facebook">f</a>
-          <a href="#" target="_blank" rel="noopener" aria-label="Instagram">ig</a>
-          <a href="#" target="_blank" rel="noopener" aria-label="X">x</a>
-          <a href="#" target="_blank" rel="noopener" aria-label="YouTube">yt</a>
-          <a href="#" target="_blank" rel="noopener" aria-label="Discord">dc</a>
-        </div>
+        <p>Meu acervo pessoal de episódios, filmes e mangá.</p>
       </div>
-      <div class="fc"><h4>Navegação</h4><ul>
-        <li><a href="#" onclick="nav('home');return false">Novidades</a></li>
-        <li><a href="#" onclick="nav('assistir');return false">Assistir</a></li>
-        <li><a href="#" onclick="nav('filmes');return false">Filmes</a></li>
-        <li><a href="#" onclick="nav('manga');return false">Mangá</a></li>
-      </ul></div>
-      <div class="fc"><h4>Comunidade</h4><ul>
-        <li><a href="#">Fórum</a></li><li><a href="#">Eventos</a></li>
-        <li><a href="#">Galeria</a></li><li><a href="#">Contato</a></li>
-      </ul></div>
-      <div class="fc"><h4>Sobre</h4><ul>
-        <li><a href="#">O Anime</a></li><li><a href="#">Personagens</a></li>
-        <li><a href="#">O Mangá</a></li><li><a href="#">Privacidade</a></li>
-      </ul></div>
-      <div class="fc"><h4>Dev</h4><ul>
-        <li><a href="https://jikan.moe/" target="_blank" rel="noopener">Jikan API</a></li>
-        <li><a href="https://docs.api.jikan.moe/" target="_blank" rel="noopener">Documentação API</a></li>
-        <li><a href="https://github.com/consumet/providers-status" target="_blank" rel="noopener">Status Consumet</a></li>
-        <li><a href="#" onclick="openAdmin();return false">Painel Admin</a></li>
-      </ul></div>
-    </div>
-    <div class="fb">
-      <p class="fb-copy">© 2024 Zatch Bell Fan Site — Uso privado. Direitos da obra: Makoto Raiku / Toei Animation.</p>
       <button class="fb-adm" onclick="openAdmin()">⚙ Admin</button>
     </div>
   </div>
@@ -641,6 +585,35 @@ ul{list-style:none}
         <input type="text" id="admAbout" placeholder="https://...jpg">
         <img class="adm-prev" id="admAboutPrev" alt="preview">
       </div>
+      <div class="adm-f">
+        <label>API de vídeo</label>
+        <select id="admVideoType">
+          <option value="none">Somente catálogo</option>
+          <option value="sugoi">SugoiAPI própria</option>
+          <option value="anfire">AnFireAPI própria</option>
+          <option value="custom">API customizada</option>
+        </select>
+      </div>
+      <div class="adm-f">
+        <label>Temporada Sugoi</label>
+        <input type="text" id="admVideoSeason" placeholder="1">
+      </div>
+      <div class="adm-f" style="grid-column:1/-1">
+        <label>URL base da API</label>
+        <input type="text" id="admVideoBase" placeholder="https://sua-api.azurewebsites.net">
+      </div>
+      <div class="adm-f" style="grid-column:1/-1">
+        <label>Chave API AnFire</label>
+        <input type="password" id="admVideoKey" placeholder="Opcional; fica salvo apenas neste navegador">
+      </div>
+      <div class="adm-f">
+        <label>Slug legendado</label>
+        <input type="text" id="admSlugSub" placeholder="zatch-bell">
+      </div>
+      <div class="adm-f">
+        <label>Slug dublado</label>
+        <input type="text" id="admSlugDub" placeholder="zatch-bell-dublado">
+      </div>
     </div>
     <div class="adm-acts">
       <button class="btn-adm-c" onclick="closeAdmin()">Cancelar</button>
@@ -656,6 +629,8 @@ ul{list-style:none}
 // =============================================================
 // STATE
 // =============================================================
+const DEFAULT_SITE_IMAGE='https://i.imgur.com/XkVbSLk.png';
+
 const S = {
   apiUrl:'',
   provider:'jikan',
@@ -669,9 +644,19 @@ const S = {
   autoplay:true,
   sources:[],
   curSrc:0,
+  filmesData:[],
   mangaData:[],
   reader:{volumeIdx:0,chapterIdx:0,chapter:null,pages:[],fit:'fit-width'},
-  adminImgs:{}
+  adminImgs:{hero:DEFAULT_SITE_IMAGE,about:DEFAULT_SITE_IMAGE},
+  videoApi:{
+    type:'none',
+    baseUrl:'',
+    apiKey:'',
+    slugSub:'zatch-bell',
+    slugDub:'zatch-bell-dublado',
+    season:'1',
+    anfireCache:{}
+  }
 };
 
 let plyr=null, hls=null;
@@ -721,15 +706,21 @@ window.addEventListener('DOMContentLoaded',()=>{
   renderEps(S.filteredEps);
   initReveal();
   connectAPI();
+  loadFilmesAPI();
   loadMangaAPI();
-  loadProviderStatus();
 });
 
 function loadAPIConfig(){
-  const saved=JSON.parse(localStorage.getItem('zatchApiConfig')||'{}');
+  const saved=safeJSON(localStorage.getItem('zatchApiConfig'),{});
   if(saved.apiUrl)S.apiUrl=saved.apiUrl;
   if(saved.provider)S.provider=saved.provider;
   if(saved.dub)S.dub=saved.dub;
+  const videoSaved=safeJSON(localStorage.getItem('zatchVideoApiConfig'),{});
+  S.videoApi={...S.videoApi,...videoSaved,anfireCache:{}};
+  S.apiUrl=S.videoApi.baseUrl||S.apiUrl;
+  const imgs=safeJSON(localStorage.getItem('zatchAdminImgs'),{});
+  S.adminImgs={...S.adminImgs,...imgs};
+  applyAdminImages();
   const apiUrl=document.getElementById('apiUrl');
   const apiProvider=document.getElementById('apiProvider');
   const apiDub=document.getElementById('apiDub');
@@ -911,13 +902,14 @@ const ZATCH_MAL_ID=250;
 const MANGADEX_BASE='https://api.mangadex.org';
 const MANGADEX_COVER_BASE='https://uploads.mangadex.org/covers';
 const ZATCH_MANGADEX_ID='63e54dfd-f7a9-473e-a591-28558e229c5b';
-const CONSUMET_STATUS_README='https://raw.githubusercontent.com/consumet/providers-status/main/README.md';
-const CONSUMET_STATUS_JSON='https://raw.githubusercontent.com/consumet/providers-status/main/status.json';
 
 async function connectAPI(){
-  S.apiUrl=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');
-  S.provider=document.getElementById('apiProvider').value;
-  S.dub=document.getElementById('apiDub').value;
+  const apiUrlEl=document.getElementById('apiUrl');
+  const apiProviderEl=document.getElementById('apiProvider');
+  const apiDubEl=document.getElementById('apiDub');
+  S.apiUrl=(apiUrlEl?.value||S.videoApi.baseUrl||S.apiUrl||'').trim().replace(/\/$/,'');
+  S.provider=apiProviderEl?.value||S.provider||'jikan';
+  S.dub=apiDubEl?.value||S.dub||'sub';
 
   localStorage.setItem('zatchApiConfig',JSON.stringify({
     apiUrl:S.apiUrl,provider:S.provider,dub:S.dub
@@ -941,7 +933,7 @@ async function connectAPI(){
         image:ep.image||ep.img||ep.thumbnail||`https://picsum.photos/seed/zb${ep.number||ep.mal_id||i+1}/320/180`,
         season:episodeSeason(ep.number||ep.mal_id||i+1),
         subOrDub:ep.subOrDub||ep.type||'sub',
-        hasDub:Boolean(ep.hasDub||ep.subOrDub==='dub'||ep.subOrDub==='both')
+        hasDub:Boolean(ep.hasDub||ep.subOrDub==='dub'||ep.subOrDub==='both'||hasDubAPI())
       }));
       S.filteredEps=[...S.allEps];
       setSt('ok',`✓ ${S.allEps.length} eps`);
@@ -961,10 +953,21 @@ async function connectAPI(){
 }
 
 async function fetchStream(ep){
-  if(S.provider!=='custom'||!S.apiUrl){
+  const cfg=S.videoApi||{};
+  const base=(cfg.baseUrl||S.apiUrl||'').trim().replace(/\/$/,'');
+  if(!base||cfg.type==='none'){
     return null;
   }
   try{
+    if(cfg.type==='sugoi'){
+      const slug=currentVideoSlug();
+      const season=encodeURIComponent(cfg.season||ep.season||1);
+      const path=`/episode/${encodeURIComponent(slug)}/${season}/${encodeURIComponent(ep.number)}`;
+      return normalizeSugoiStream(await fetchAPI(path),ep);
+    }
+    if(cfg.type==='anfire'){
+      return normalizeAnFireStream(await fetchAnFireEpisode(ep),ep);
+    }
     return normalizeStream(await fetchAPI(`/episodes/${encodeURIComponent(ep.id)}/sources?type=${encodeURIComponent(S.dub)}`));
   }catch(e){
     try{
@@ -993,7 +996,8 @@ async function loadCustomEpisodes(){
 
 async function fetchAPI(path,timeout=10000){
   try{
-    const res=await fetch(S.apiUrl+path,{signal:AbortSignal.timeout(timeout)});
+    const base=(S.videoApi?.baseUrl||S.apiUrl||'').trim().replace(/\/$/,'');
+    const res=await fetch(base+path,{signal:AbortSignal.timeout(timeout)});
     if(!res.ok)throw new Error(`HTTP ${res.status} em ${path}`);
     return res.json();
   }catch(e){
@@ -1009,103 +1013,8 @@ async function fetchJSON(url,timeout=12000){
   return res.json();
 }
 
-async function loadProviderStatus(){
-  try{
-    const text=await fetchText(CONSUMET_STATUS_README,12000);
-    const parsed=parseProviderStatusMarkdown(text);
-    renderProviderStatus(parsed);
-  }catch(e){
-    try{
-      const json=await fetchJSON(CONSUMET_STATUS_JSON,12000);
-      renderProviderStatus(normalizeProviderStatusJSON(json));
-    }catch(e2){
-      const el=document.getElementById('providerStatus');
-      if(el)el.innerHTML='<span class="provider-title">Providers oficiais:</span><span class="provider-pill warn">Status indisponível agora</span>';
-    }
-  }
-}
-
-async function fetchText(url,timeout=12000){
-  const res=await fetch(url,{signal:AbortSignal.timeout(timeout)});
-  if(!res.ok)throw new Error(`HTTP ${res.status} em ${url}`);
-  return res.text();
-}
-
-function parseProviderStatusMarkdown(markdown){
-  const normalized=markdown.replace(/\r?\n/g,' ');
-  const lastUpdated=(normalized.match(/Last updated:\s*([^#|]+)/i)?.[1]||'').trim();
-  const categories={};
-  const sectionRe=/##\s+([A-Z_]+)\s+(.*?)(?=\s+##\s+[A-Z_]+|\s+---|\s+##\s+Summary|$)/g;
-  let section;
-  while((section=sectionRe.exec(normalized))){
-    const category=section[1];
-    const body=section[2];
-    categories[category]=[];
-    const rowRe=/\|\s*\[([^\]]+)\]\(([^)]+)\)\s*\|\s*(?:[^\d|]*\s*)?(\d+)\s*\|\s*([^|]+?)\s*\|/g;
-    let row;
-    while((row=rowRe.exec(body))){
-      categories[category].push({
-        provider:row[1],
-        baseUrl:row[2],
-        status:Number(row[3]),
-        responseTime:row[4].trim(),
-        category
-      });
-    }
-  }
-  return {lastUpdated,categories};
-}
-
-function normalizeProviderStatusJSON(json){
-  const categories={};
-  (json.categories||[]).forEach(cat=>{
-    categories[cat.category]=(cat.providers||[]).map(p=>({...p,category:cat.category}));
-  });
-  return {lastUpdated:json.lastUpdated||'',categories};
-}
-
-function renderProviderStatus(status){
-  const el=document.getElementById('providerStatus');
-  if(!el)return;
-  const cat=status.categories||{};
-  const animeOk=(cat.ANIME||[]).filter(p=>p.status===200);
-  const mangaOk=(cat.MANGA||[]).filter(p=>p.status===200);
-  const metaOk=(cat.META||[]).filter(p=>p.status===200);
-  const newsOk=(cat.NEWS||[]).filter(p=>p.status===200);
-  const pills=[
-    providerSummaryPill('Anime',animeOk,cat.ANIME||[]),
-    providerSummaryPill('Mangá',mangaOk,cat.MANGA||[]),
-    providerSummaryPill('Meta',metaOk,cat.META||[]),
-    providerSummaryPill('News',newsOk,cat.NEWS||[])
-  ];
-  const updated=status.lastUpdated?`Atualizado ${formatProviderDate(status.lastUpdated)}`:'Consumet providers-status';
-  el.innerHTML=[
-    '<span class="provider-title">Providers oficiais:</span>',
-    ...pills,
-    `<span class="provider-note">${updated}</span>`
-  ].join('');
-}
-
-function providerSummaryPill(label,working,total){
-  const cls=working.length?'ok':'err';
-  const names=working.slice(0,3).map(p=>`<a href="${safeUrl(p.baseUrl)}" target="_blank" rel="noopener">${escapeHTML(p.provider)}</a>`).join(', ');
-  const text=working.length?`${label}: ${names}${working.length>3?` +${working.length-3}`:''}`:`${label}: 0/${total.length} online`;
-  return `<span class="provider-pill ${cls}">${text}</span>`;
-}
-
 function escapeHTML(value){
   return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
-
-function safeUrl(value){
-  const url=String(value??'');
-  return /^https?:\/\//i.test(url)?escapeHTML(url):'#';
-}
-
-function formatProviderDate(value){
-  const d=new Date(value);
-  if(Number.isNaN(d.getTime()))return value;
-  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
 
 function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
@@ -1160,6 +1069,98 @@ function normalizeStream(data){
     url:s.url||s.file,
     isM3U8:s.isM3U8||String(s.url||s.file||'').includes('.m3u8')
   })).filter(s=>s.url)};
+}
+
+function currentVideoSlug(){
+  const cfg=S.videoApi||{};
+  return (S.dub==='dub'?cfg.slugDub:cfg.slugSub)||cfg.slugSub||cfg.slugDub||'zatch-bell';
+}
+
+function hasDubAPI(){
+  const cfg=S.videoApi||{};
+  return Boolean(cfg.type&&cfg.type!=='none'&&cfg.baseUrl&&cfg.slugDub);
+}
+
+function normalizeSugoiStream(data,ep){
+  const sources=[];
+  const buckets=[
+    ...(Array.isArray(data?.data)?data.data:[]),
+    ...(Array.isArray(data?.episodes)?data.episodes:[])
+  ];
+  buckets.forEach(bucket=>{
+    const eps=Array.isArray(bucket?.episodes)?bucket.episodes:[bucket];
+    eps.forEach(item=>{
+      addLooseSource(sources,item?.episode||item?.url||item?.file||item,`Ep ${ep.number}`);
+    });
+  });
+  addLooseSource(sources,data?.episode||data?.url||data?.file,`Ep ${ep.number}`);
+  return {sources:uniqueSources(sources)};
+}
+
+async function fetchAnFireEpisode(ep){
+  const cfg=S.videoApi||{};
+  const slug=currentVideoSlug();
+  const cacheKey=`${S.dub}:${slug}`;
+  if(!cfg.anfireCache)cfg.anfireCache={};
+  if(!cfg.anfireCache[cacheKey]){
+    const params=new URLSearchParams();
+    if(cfg.apiKey)params.set('api_key',cfg.apiKey);
+    params.set('anime_slug',slug);
+    const base=(cfg.baseUrl||'').trim();
+    const path=/\.php(?:$|\?)/i.test(base)?`?${params.toString()}`:`/api.php?${params.toString()}`;
+    cfg.anfireCache[cacheKey]=await fetchAPI(path,18000);
+  }
+  const data=cfg.anfireCache[cacheKey];
+  const list=data?.episodes||data?.data?.episodes||data?.results||data?.data||[];
+  if(!Array.isArray(list))return data;
+  return list.find(item=>Number(item?.episode||item?.number||item?.ep)===Number(ep.number))||null;
+}
+
+function normalizeAnFireStream(data,ep){
+  const sources=[];
+  const candidates=[
+    data?.sources,
+    data?.data,
+    data?.urls,
+    data?.videos,
+    data?.links,
+    data?.url,
+    data?.file,
+    data
+  ];
+  candidates.forEach(value=>addLooseSource(sources,value,`Ep ${ep.number}`));
+  return {sources:uniqueSources(sources)};
+}
+
+function addLooseSource(out,value,label='Auto'){
+  if(!value)return;
+  if(typeof value==='string'){
+    out.push({url:value,quality:label,isM3U8:value.includes('.m3u8')});
+    return;
+  }
+  if(Array.isArray(value)){
+    value.forEach(v=>addLooseSource(out,v,label));
+    return;
+  }
+  const url=value.url||value.file||value.src||value.link||value.episode;
+  if(typeof url==='string'&&url.trim())out.push({
+    ...value,
+    url:url.trim(),
+    quality:value.quality||value.resolution||value.label||label,
+    isM3U8:value.isM3U8||String(url).includes('.m3u8')
+  });
+  ['sources','data','urls','videos','links','episodes'].forEach(key=>{
+    if(value[key]!==value)addLooseSource(out,value[key],value.quality||value.resolution||label);
+  });
+}
+
+function uniqueSources(sources){
+  const seen=new Set();
+  return sources.filter(source=>{
+    if(!source.url||seen.has(source.url))return false;
+    seen.add(source.url);
+    return true;
+  });
 }
 
 // =============================================================
@@ -1436,7 +1437,7 @@ function renderReaderPages(){
   if(!S.reader.pages.length){
     wrap.innerHTML=`<div class="reader-empty">
       <h3>Nenhuma página configurada para este capítulo</h3>
-      <p>O catálogo de mangá vem pela Jikan API, mas páginas de leitura precisam vir de uma API própria/autorizada. Use estes endpoints na sua API:</p>
+      <p>O catálogo de mangá vem por API, mas páginas de leitura precisam vir de uma fonte configurada por você. Use estes endpoints na sua API:</p>
       <p><code>GET /manga/chapters/{capitulo}/pages</code> ou <code>GET /manga/pages?chapter={capitulo}</code></p>
       <p>Você também pode colar URLs de imagens abaixo, uma por linha, para testar o leitor neste navegador:</p>
       <textarea id="readerImport" placeholder="https://seusite.com/capitulo-1/pagina-1.jpg&#10;https://seusite.com/capitulo-1/pagina-2.jpg"></textarea>
@@ -1488,9 +1489,52 @@ function closeReader(){document.getElementById('readerModal').classList.remove('
 // =============================================================
 // FILMES
 // =============================================================
+async function loadFilmesAPI(){
+  try{
+    const data=await fetchJSON(`${JIKAN_BASE}/anime?q=${encodeURIComponent('Zatch Bell')}&type=movie&sfw=true&limit=12`);
+    const movies=(data.data||[])
+      .filter(item=>/zatch|gash/i.test(`${item.title} ${item.title_english||''} ${item.title_japanese||''}`))
+      .map((item,i)=>({
+        id:item.mal_id||`movie-${i+1}`,
+        title:item.title_english||item.title||`Filme ${i+1}`,
+        description:item.synopsis||'Filme carregado pela API.',
+        image:item.images?.jpg?.large_image_url||item.images?.webp?.large_image_url||`https://picsum.photos/seed/fz${i+1}/320/180`,
+        year:item.year||new Date(item.aired?.from||'').getFullYear()||'',
+        score:item.score||'',
+        subOrDub:'sub',
+        hasDub:hasDubAPI()
+      }));
+    S.filmesData=movies.length?movies:DEMO_FILMES;
+  }catch(e){
+    S.filmesData=DEMO_FILMES;
+  }
+  renderFilmes();
+}
+
 function renderFilmes(){
   const g=document.getElementById('filmesGrid');
-  if(g)g.innerHTML=DEMO_FILMES.map(ep=>epCard(ep)).join('');
+  if(g)g.innerHTML=(S.filmesData.length?S.filmesData:DEMO_FILMES).map((film,i)=>filmCard(film,i)).join('');
+}
+
+function filmCard(film,index){
+  const bdg=film.hasDub?'<span class="ep-bdg both">LEG+DUB</span>':'<span class="ep-bdg sub">LEG</span>';
+  const meta=[film.year,film.score?`Nota ${film.score}`:''].filter(Boolean).join(' · ');
+  return `<div class="ep-card" onclick="playFilm(${index})">
+    <div class="ep-thumb">
+      <img src="${film.image}" alt="${escapeHTML(film.title)}" width="320" height="180" loading="lazy">${bdg}
+      <div class="play-ov"><div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-num">${meta||'Filme'}</div>
+      <div class="ep-ttl">${escapeHTML(film.title)}</div>
+    </div>
+  </div>`;
+}
+
+function playFilm(index){
+  const film=(S.filmesData.length?S.filmesData:DEMO_FILMES)[index];
+  if(!film)return;
+  toast('Filme carregado no catálogo. Configure uma API própria no Admin para vídeo.','inf');
 }
 
 // =============================================================
@@ -1501,6 +1545,12 @@ function openAdmin(){
   if(h)h.value=S.adminImgs.hero||'';
   const a=document.getElementById('admAbout');
   if(a)a.value=S.adminImgs.about||'';
+  setValue('admVideoType',S.videoApi.type||'none');
+  setValue('admVideoBase',S.videoApi.baseUrl||'');
+  setValue('admVideoKey',S.videoApi.apiKey||'');
+  setValue('admSlugSub',S.videoApi.slugSub||'zatch-bell');
+  setValue('admSlugDub',S.videoApi.slugDub||'zatch-bell-dublado');
+  setValue('admVideoSeason',S.videoApi.season||'1');
   ['Hero','About'].forEach(k=>{
     const inp=document.getElementById('adm'+k);
     const prev=document.getElementById('adm'+k+'Prev');
@@ -1513,19 +1563,56 @@ function openAdmin(){
 }
 function closeAdmin(){document.getElementById('admPanel').classList.remove('open');}
 function saveAdmin(){
-  const h=document.getElementById('admHero').value.trim();
-  const a=document.getElementById('admAbout').value.trim();
-  if(h){S.adminImgs.hero=h;document.getElementById('heroBgImg').src=h;}
-  if(a){S.adminImgs.about=a;document.getElementById('aboutImg').src=a;}
+  const h=getValue('admHero').trim()||DEFAULT_SITE_IMAGE;
+  const a=getValue('admAbout').trim()||DEFAULT_SITE_IMAGE;
+  S.adminImgs={hero:h,about:a};
+  S.videoApi={
+    ...S.videoApi,
+    type:getValue('admVideoType')||'none',
+    baseUrl:getValue('admVideoBase').trim().replace(/\/$/,''),
+    apiKey:getValue('admVideoKey').trim(),
+    slugSub:getValue('admSlugSub').trim()||'zatch-bell',
+    slugDub:getValue('admSlugDub').trim()||'zatch-bell-dublado',
+    season:getValue('admVideoSeason').trim()||'1',
+    anfireCache:{}
+  };
+  S.apiUrl=S.videoApi.baseUrl;
+  localStorage.setItem('zatchAdminImgs',JSON.stringify(S.adminImgs));
+  localStorage.setItem('zatchVideoApiConfig',JSON.stringify({
+    type:S.videoApi.type,
+    baseUrl:S.videoApi.baseUrl,
+    apiKey:S.videoApi.apiKey,
+    slugSub:S.videoApi.slugSub,
+    slugDub:S.videoApi.slugDub,
+    season:S.videoApi.season
+  }));
+  applyAdminImages();
+  connectAPI();
+  loadFilmesAPI();
   closeAdmin();
-  toast('✓ Imagens atualizadas!','ok');
+  toast('✓ Configurações salvas!','ok');
 }
+
+function applyAdminImages(){
+  const hero=document.getElementById('heroBgImg');
+  const about=document.getElementById('aboutImg');
+  if(hero)hero.src=S.adminImgs.hero||DEFAULT_SITE_IMAGE;
+  if(about)about.src=S.adminImgs.about||DEFAULT_SITE_IMAGE;
+}
+
+function getValue(id){return document.getElementById(id)?.value||'';}
+function setValue(id,value){const el=document.getElementById(id);if(el)el.value=value;}
 
 // =============================================================
 // HELPERS
 // =============================================================
+function safeJSON(raw,fallback){
+  try{return raw?JSON.parse(raw):fallback;}catch(e){return fallback;}
+}
+
 function setSt(type,msg){
   const el=document.getElementById('apiSt');
+  if(!el)return;
   el.className='api-st '+type;
   el.textContent=msg;
 }
