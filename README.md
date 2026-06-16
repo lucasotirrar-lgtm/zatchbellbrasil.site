@@ -15,6 +15,30 @@ GET /episodes/{id}/sources?type=sub
 GET /watch/{id}
 ```
 
+## Leitor de manga
+
+O leitor de manga tambem fica leve: o catalogo vem da Jikan API e as paginas podem vir de uma API propria/autorizada.
+
+Endpoints aceitos pelo leitor:
+
+```text
+GET /manga/chapters/{capitulo}/pages
+GET /manga/pages?chapter={capitulo}
+```
+
+Resposta esperada:
+
+```json
+{
+  "pages": [
+    "https://seu-cdn.com/capitulo-1/pagina-1.jpg",
+    "https://seu-cdn.com/capitulo-1/pagina-2.jpg"
+  ]
+}
+```
+
+Tambem da para colar URLs de paginas direto no leitor para testar no navegador, sem salvar arquivos no projeto.
+
 O site permanece estatico e leve para o plano gratis da Azure; os dados vem por API no navegador.
 
 ## Dominio

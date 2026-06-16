@@ -236,6 +236,19 @@ ul{list-style:none}
 .ch-sub{font-size:11px;color:var(--muted)}
 .ch-read{font-size:11px;font-weight:700;color:var(--gold);background:rgba(255,215,0,.1);padding:4px 10px;border-radius:99px;transition:all var(--tr)}
 .ch-read:hover{background:rgba(255,215,0,.2)}
+.reader-box{max-width:980px}
+.reader-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.reader-tools button,.reader-tools label{font-size:12px;font-weight:800;border-radius:var(--rsm);padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);transition:all var(--tr)}
+.reader-tools button:hover,.reader-tools label:hover{color:var(--text);background:rgba(255,255,255,.1)}
+.reader-tools .on{background:rgba(255,215,0,.12);color:var(--gold);border-color:rgba(255,215,0,.35)}
+.reader-pages{display:flex;flex-direction:column;align-items:center;gap:10px;background:#070b14;border-radius:var(--rmd);padding:12px;min-height:280px}
+.reader-pages.fit-width img{width:100%;max-width:820px}
+.reader-pages.fit-height img{max-height:86vh;width:auto}
+.reader-pages img{border-radius:var(--rsm);background:var(--navy3);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.reader-empty{max-width:680px;margin:auto;text-align:left;color:var(--muted);line-height:1.6}
+.reader-empty h3{font-size:16px;color:var(--text);margin-bottom:8px}
+.reader-empty textarea{width:100%;min-height:130px;margin:12px 0;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:var(--rsm);padding:10px;color:var(--text);font-family:var(--fb);resize:vertical}
+.reader-empty code{color:var(--gold)}
 
 /* ===== ADMIN ===== */
 .adm-panel{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px}
@@ -576,6 +589,25 @@ ul{list-style:none}
   </div>
 </div>
 
+<div class="modal" id="readerModal">
+  <div class="modal-box reader-box">
+    <div class="modal-hd">
+      <span class="modal-ttl" id="readerTtl">Leitor</span>
+      <button class="modal-close" onclick="closeReader()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="reader-tools">
+        <button onclick="readerPrevChapter()">Anterior</button>
+        <button onclick="readerNextChapter()">Próximo</button>
+        <button id="readerFitWidth" class="on" onclick="setReaderFit('fit-width')">Largura</button>
+        <button id="readerFitHeight" onclick="setReaderFit('fit-height')">Altura</button>
+        <button onclick="clearReaderPages()">Limpar páginas</button>
+      </div>
+      <div class="reader-pages fit-width" id="readerPages"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN -->
 <div class="adm-panel" id="admPanel">
   <div class="adm-box">
@@ -621,6 +653,7 @@ const S = {
   sources:[],
   curSrc:0,
   mangaData:[],
+  reader:{volumeIdx:0,chapterIdx:0,chapter:null,pages:[],fit:'fit-width'},
   adminImgs:{}
 };
 
@@ -1125,17 +1158,121 @@ async function loadMangaAPI(){
   if(g)g.style.display='grid';
   renderMangaGrid();
 }
+
 function openMg(i){
   const m=S.mangaData[i];if(!m)return;
   document.getElementById('mgModalTtl').textContent=m.title+' — Capítulos';
-  document.getElementById('chList').innerHTML=m.chapters.map(c=>`
+  document.getElementById('chList').innerHTML=m.chapters.map((c,ci)=>`
     <div class="ch-item">
       <div><div class="ch-num">Capítulo ${c.num}</div><div class="ch-sub">${c.title}</div></div>
-      <button class="ch-read" onclick="toast('Configure um leitor de mangá na API!','inf')">Ler</button>
+      <button class="ch-read" onclick="openReader(${i},${ci})">Ler</button>
     </div>`).join('');
   document.getElementById('mgModal').classList.add('open');
 }
 function closeMg(){document.getElementById('mgModal').classList.remove('open');}
+
+async function openReader(volumeIdx,chapterIdx){
+  const volume=S.mangaData[volumeIdx];
+  const chapter=volume?.chapters?.[chapterIdx];
+  if(!volume||!chapter)return;
+  S.reader={...S.reader,volumeIdx,chapterIdx,chapter,pages:[]};
+  document.getElementById('readerTtl').textContent=`${volume.title} — Capítulo ${chapter.num}`;
+  document.getElementById('readerModal').classList.add('open');
+  renderReaderLoading('Buscando páginas...');
+  const pages=await loadReaderPages(chapter);
+  S.reader.pages=pages;
+  renderReaderPages();
+}
+
+async function loadReaderPages(chapter){
+  const saved=localStorage.getItem(readerStorageKey(chapter.num));
+  if(saved){
+    try{return normalizePageList(JSON.parse(saved));}catch(e){}
+  }
+  if(S.apiUrl){
+    const paths=[
+      `/manga/chapters/${encodeURIComponent(chapter.num)}/pages`,
+      `/manga/pages?chapter=${encodeURIComponent(chapter.num)}`
+    ];
+    for(const path of paths){
+      try{
+        const data=await fetchAPI(path,12000);
+        const pages=normalizePageList(data);
+        if(pages.length)return pages;
+      }catch(e){}
+    }
+  }
+  return [];
+}
+
+function normalizePageList(data){
+  const raw=Array.isArray(data)?data:(data?.pages||data?.images||data?.data||[]);
+  return raw.map((p,i)=>({
+    url:typeof p==='string'?p:(p.url||p.src||p.image||p.image_url),
+    alt:`Página ${i+1}`
+  })).filter(p=>/^https?:\/\//i.test(p.url));
+}
+
+function renderReaderLoading(msg){
+  const wrap=document.getElementById('readerPages');
+  wrap.className='reader-pages '+S.reader.fit;
+  wrap.innerHTML=`<div class="reader-empty"><h3>${msg}</h3></div>`;
+}
+
+function renderReaderPages(){
+  const wrap=document.getElementById('readerPages');
+  wrap.className='reader-pages '+S.reader.fit;
+  if(!S.reader.pages.length){
+    wrap.innerHTML=`<div class="reader-empty">
+      <h3>Nenhuma página configurada para este capítulo</h3>
+      <p>O catálogo de mangá vem pela Jikan API, mas páginas de leitura precisam vir de uma API própria/autorizada. Use estes endpoints na sua API:</p>
+      <p><code>GET /manga/chapters/{capitulo}/pages</code> ou <code>GET /manga/pages?chapter={capitulo}</code></p>
+      <p>Você também pode colar URLs de imagens abaixo, uma por linha, para testar o leitor neste navegador:</p>
+      <textarea id="readerImport" placeholder="https://seusite.com/capitulo-1/pagina-1.jpg&#10;https://seusite.com/capitulo-1/pagina-2.jpg"></textarea>
+      <button class="ch-read" onclick="importReaderPages()">Carregar páginas coladas</button>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML=S.reader.pages.map((p,i)=>`<img src="${p.url}" alt="${p.alt||`Página ${i+1}`}" loading="${i<2?'eager':'lazy'}">`).join('');
+}
+
+function importReaderPages(){
+  const value=document.getElementById('readerImport')?.value||'';
+  let pages=[];
+  try{pages=normalizePageList(JSON.parse(value));}
+  catch(e){pages=normalizePageList(value.split(/\s+/).filter(Boolean));}
+  if(!pages.length){toast('Cole URLs válidas de imagens.','err');return;}
+  S.reader.pages=pages;
+  localStorage.setItem(readerStorageKey(S.reader.chapter.num),JSON.stringify(pages.map(p=>p.url)));
+  renderReaderPages();
+  toast(`✓ ${pages.length} páginas carregadas no leitor.`,'ok');
+}
+
+function clearReaderPages(){
+  if(S.reader.chapter)localStorage.removeItem(readerStorageKey(S.reader.chapter.num));
+  S.reader.pages=[];
+  renderReaderPages();
+}
+
+function readerStorageKey(chapterNum){return `zatchMangaPages:${chapterNum}`;}
+
+function setReaderFit(fit){
+  S.reader.fit=fit;
+  document.getElementById('readerFitWidth').classList.toggle('on',fit==='fit-width');
+  document.getElementById('readerFitHeight').classList.toggle('on',fit==='fit-height');
+  renderReaderPages();
+}
+
+function readerPrevChapter(){
+  if(S.reader.chapterIdx>0)openReader(S.reader.volumeIdx,S.reader.chapterIdx-1);
+}
+
+function readerNextChapter(){
+  const volume=S.mangaData[S.reader.volumeIdx];
+  if(volume&&S.reader.chapterIdx<volume.chapters.length-1)openReader(S.reader.volumeIdx,S.reader.chapterIdx+1);
+}
+
+function closeReader(){document.getElementById('readerModal').classList.remove('open');}
 
 // =============================================================
 // FILMES
@@ -1191,9 +1328,10 @@ function toast(msg,type='inf'){
 }
 document.addEventListener('click',e=>{
   if(e.target.id==='mgModal')closeMg();
+  if(e.target.id==='readerModal')closeReader();
   if(e.target.id==='admPanel')closeAdmin();
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMg();closeAdmin();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMg();closeReader();closeAdmin();}});
 </script>
 </body>
 </html>
